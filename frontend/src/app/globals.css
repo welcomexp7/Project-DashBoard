@@ -1,0 +1,402 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Aceternity UI 스타일 다크 테마
+   깊은 다크 + 블루-퍼플 언더톤 + Glassmorphism
+   ============================================================ */
+
+:root {
+  /* 기본 배경/전경 */
+  --background: #030712;
+  --background-secondary: #0a0f1e;
+  --foreground: #e2e8f0;
+
+  /* 서피스 계층 (Glassmorphism) */
+  --surface: rgba(15, 23, 42, 0.6);
+  --surface-solid: #0f172a;
+  --surface-hover: rgba(30, 41, 59, 0.8);
+  --surface-elevated: rgba(15, 23, 42, 0.8);
+
+  /* 보더 */
+  --border: rgba(148, 163, 184, 0.1);
+  --border-hover: rgba(148, 163, 184, 0.2);
+  --border-subtle: rgba(148, 163, 184, 0.05);
+
+  /* 텍스트 */
+  --muted: #64748b;
+  --muted-foreground: #94a3b8;
+
+  /* 포인트 */
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --accent-glow: rgba(59, 130, 246, 0.15);
+
+  /* 그라디언트 스펙트럼 */
+  --gradient-start: #3b82f6;
+  --gradient-mid: #8b5cf6;
+  --gradient-end: #06b6d4;
+
+  /* 시맨틱 */
+  --danger: #ef4444;
+  --success: #22c55e;
+  --warning: #f59e0b;
+
+  /* 효과 */
+  --spotlight-color: rgba(59, 130, 246, 0.08);
+  --grid-color: rgba(148, 163, 184, 0.03);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-solid: var(--surface-solid);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-border: var(--border);
+  --color-border-hover: var(--border-hover);
+  --color-border-subtle: var(--border-subtle);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-glow: var(--accent-glow);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ============================================================
+   전역 바디
+   ============================================================ */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================
+   커스텀 스크롤바
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.3);
+}
+
+/* ============================================================
+   배경 패턴 (Aceternity 도트 그리드)
+   ============================================================ */
+.bg-dot-pattern {
+  background-image: radial-gradient(
+    circle,
+    rgba(148, 163, 184, 0.07) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
+}
+
+.bg-grid-fade {
+  mask-image: linear-gradient(to bottom, white 30%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, white 30%, transparent 100%);
+}
+
+/* ============================================================
+   카드 Spotlight 호버 효과
+   ============================================================ */
+.card-spotlight {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: radial-gradient(
+    600px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%),
+    var(--spotlight-color),
+    transparent 40%
+  );
+  pointer-events: none;
+}
+
+.card-spotlight:hover::before {
+  opacity: 1;
+}
+
+/* ============================================================
+   Moving Gradient Border (회전 그라디언트 보더)
+   ============================================================ */
+@property --border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.moving-border {
+  position: relative;
+}
+
+.moving-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--border-angle),
+    transparent 60%,
+    var(--gradient-start),
+    var(--gradient-mid),
+    var(--gradient-end),
+    transparent 90%
+  );
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  animation: rotate-border 4s linear infinite;
+}
+
+.moving-border:hover::before {
+  opacity: 1;
+}
+
+.moving-border::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--background);
+}
+
+@keyframes rotate-border {
+  to {
+    --border-angle: 360deg;
+  }
+}
+
+/* ============================================================
+   티켓 카드 글로우 호버
+   ============================================================ */
+.ticket-glow {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.ticket-glow:hover {
+  border-color: rgba(59, 130, 246, 0.2);
+  box-shadow:
+    0 0 0 1px rgba(59, 130, 246, 0.1),
+    0 4px 20px rgba(59, 130, 246, 0.05);
+}
+
+/* ============================================================
+   모달 상단 그라디언트 라인
+   ============================================================ */
+.modal-gradient-line {
+  position: relative;
+}
+
+.modal-gradient-line::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--gradient-start),
+    var(--gradient-mid),
+    var(--gradient-end),
+    transparent
+  );
+  border-radius: 9999px;
+}
+
+.modal-gradient-line::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 15%;
+  right: 15%;
+  height: 20px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(59, 130, 246, 0.1),
+    rgba(139, 92, 246, 0.08),
+    transparent
+  );
+  filter: blur(10px);
+  border-radius: 9999px;
+  pointer-events: none;
+}
+
+/* ============================================================
+   드래그 / 모달 / 에이전트 로그
+   ============================================================ */
+.dragging {
+  user-select: none;
+}
+
+.modal-overlay {
+  backdrop-filter: blur(8px);
+}
+
+.kanban-column-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.15) transparent;
+}
+
+.agent-log-output {
+  font-family: var(--font-mono, "Courier New", monospace);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ============================================================
+   접근성: 애니메이션 제한 모드
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .moving-border::before,
+  .bg-beam {
+    animation: none;
+    opacity: 0;
+  }
+  .card-spotlight::before {
+    transition: none;
+  }
+}
+
+/* 포커스 표시 */
+.card-spotlight:focus-visible,
+.ticket-glow:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   마크다운 프리뷰 — 다크 테마 (프로젝트 노트용)
+   ============================================================ */
+.prose-dark {
+  color: #e2e8f0;
+  line-height: 1.7;
+}
+.prose-dark h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 1.25em 0 0.5em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 0.3em;
+}
+.prose-dark h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin: 1em 0 0.4em;
+}
+.prose-dark h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin: 0.8em 0 0.3em;
+}
+.prose-dark p {
+  margin: 0.6em 0;
+}
+.prose-dark a {
+  color: #60a5fa;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-dark a:hover {
+  color: #93bbfd;
+}
+.prose-dark code {
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.15em 0.35em;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  font-family: var(--font-mono, monospace);
+}
+.prose-dark pre {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 0.75em 0;
+}
+.prose-dark pre code {
+  background: none;
+  padding: 0;
+}
+.prose-dark ul,
+.prose-dark ol {
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+.prose-dark li {
+  margin: 0.2em 0;
+}
+.prose-dark blockquote {
+  border-left: 3px solid #3b82f6;
+  padding-left: 1em;
+  color: #94a3b8;
+  font-style: italic;
+  margin: 0.75em 0;
+}
+.prose-dark hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin: 1.5em 0;
+}
+.prose-dark table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75em 0;
+}
+.prose-dark th,
+.prose-dark td {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.5em 0.75em;
+  text-align: left;
+}
+.prose-dark th {
+  background: rgba(255, 255, 255, 0.04);
+  font-weight: 600;
+}
+.prose-dark strong {
+  color: #f1f5f9;
+  font-weight: 600;
+}
+.prose-dark img {
+  max-width: 100%;
+  border-radius: 0.5rem;
+}
