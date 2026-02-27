@@ -5,23 +5,15 @@
 // Aceternity UI 스타일 — 도트 그리드 배경 + 그라디언트 텍스트
 // ============================================================
 
-import { useEffect, useCallback, useState, useRef } from "react";
+import { useEffect, useCallback } from "react";
 import { useProjectStore } from "@/src/store/useProjectStore";
 import DashboardGrid from "@/src/components/dashboard/DashboardGrid";
-import ProjectNoteModal from "@/src/components/notes/ProjectNoteModal";
 import { KANBAN_STAGES } from "@/src/constants/kanban";
-import { Loader2, FileText, ChevronDown } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useSSE } from "@/src/hooks/useSSE";
-import { cn } from "@/src/lib/utils";
 
 export default function DashboardPage() {
   const { dashboard, isLoading, error, fetchDashboard } = useProjectStore();
-
-  // 프로젝트 노트 모달 상태
-  const [noteProjectId, setNoteProjectId] = useState<string | null>(null);
-  const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchDashboard();
@@ -32,17 +24,6 @@ export default function DashboardPage() {
     fetchDashboard();
   }, [fetchDashboard]);
   useSSE({ onTodoChanged: handleTodoChanged });
-
-  // 드롭다운 외부 클릭 닫기
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setIsProjectDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
 
   // 로딩 상태
   if (isLoading && !dashboard) {
@@ -133,113 +114,10 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* 프로젝트 디테일 툴바 */}
-        <div className="mb-6 flex items-center gap-3">
-          <div ref={dropdownRef} className="relative">
-            <button
-              onClick={() => setIsProjectDropdownOpen(!isProjectDropdownOpen)}
-              className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm transition-colors hover:border-white/[0.15]"
-            >
-              {selectedProjectId ? (
-                <>
-                  <span
-                    className="h-2.5 w-2.5 rounded-full"
-                    style={{
-                      backgroundColor:
-                        dashboard.projects.find(
-                          (p) => p.project_id === selectedProjectId
-                        )?.color ?? "#6366f1",
-                      boxShadow: `0 0 6px ${
-                        dashboard.projects.find(
-                          (p) => p.project_id === selectedProjectId
-                        )?.color ?? "#6366f1"
-                      }40`,
-                    }}
-                  />
-                  <span className="text-foreground">
-                    {dashboard.projects.find(
-                      (p) => p.project_id === selectedProjectId
-                    )?.name ?? selectedProjectId}
-                  </span>
-                </>
-              ) : (
-                <span className="text-muted">프로젝트 선택</span>
-              )}
-              <ChevronDown
-                className={cn(
-                  "h-3.5 w-3.5 text-muted transition-transform",
-                  isProjectDropdownOpen && "rotate-180"
-                )}
-              />
-            </button>
-
-            {isProjectDropdownOpen && (
-              <div className="absolute left-0 top-full z-20 mt-1 w-72 rounded-xl border border-white/[0.08] bg-slate-900/95 py-1.5 shadow-xl backdrop-blur-2xl">
-                {dashboard.projects.map((p) => (
-                  <button
-                    key={p.project_id}
-                    onClick={() => {
-                      setSelectedProjectId(p.project_id);
-                      setIsProjectDropdownOpen(false);
-                    }}
-                    className={cn(
-                      "flex w-full items-center gap-2.5 px-3 py-2 text-sm transition-colors hover:bg-white/[0.05]",
-                      p.project_id === selectedProjectId &&
-                        "bg-white/[0.05] font-medium"
-                    )}
-                  >
-                    <span
-                      className="h-2 w-2 rounded-full"
-                      style={{
-                        backgroundColor: p.color,
-                        boxShadow: `0 0 6px ${p.color}40`,
-                      }}
-                    />
-                    <span className="shrink-0 font-mono text-[11px] text-muted">
-                      {p.project_id}
-                    </span>
-                    <span className="text-white/[0.1]">|</span>
-                    <span className="flex-1 truncate text-left">{p.name}</span>
-                    {p.project_id === selectedProjectId && (
-                      <span className="text-[10px] text-accent">선택됨</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <button
-            onClick={() => {
-              if (selectedProjectId) setNoteProjectId(selectedProjectId);
-            }}
-            disabled={!selectedProjectId}
-            className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-white shadow-[0_0_15px_rgba(59,130,246,0.15)] transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <FileText className="h-4 w-4" />
-            프로젝트 디테일
-          </button>
-        </div>
-
         {/* 프로젝트 그리드 */}
         <DashboardGrid projects={dashboard.projects} />
       </div>
 
-      {/* 프로젝트 노트 모달 — isLoading 바깥 배치 (MEMORY.md 패턴) */}
-      {noteProjectId && (
-        <ProjectNoteModal
-          projectId={noteProjectId}
-          projectName={
-            dashboard.projects.find((p) => p.project_id === noteProjectId)
-              ?.name ?? noteProjectId
-          }
-          projectColor={
-            dashboard.projects.find((p) => p.project_id === noteProjectId)
-              ?.color ?? "#6366f1"
-          }
-          onClose={() => setNoteProjectId(null)}
-        />
-      )}
     </div>
   );
 }

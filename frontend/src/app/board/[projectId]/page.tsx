@@ -8,10 +8,11 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ChevronDown, CheckSquare, X, Bot, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronDown, CheckSquare, X, Bot, Trash2, FileText } from "lucide-react";
 import { useProjectStore } from "@/src/store/useProjectStore";
 import { useKanbanStore } from "@/src/store/useKanbanStore";
 import KanbanBoard from "@/src/components/kanban/KanbanBoard";
+import ProjectNoteModal from "@/src/components/notes/ProjectNoteModal";
 import { cn } from "@/src/lib/utils";
 import type { TicketResponse } from "@/src/types";
 
@@ -37,6 +38,9 @@ export default function BoardPage() {
   const [multiDetailRequest, setMultiDetailRequest] = useState<
     TicketResponse[] | null
   >(null);
+
+  // 프로젝트 노트 모달
+  const [isNoteOpen, setIsNoteOpen] = useState(false);
 
   useEffect(() => {
     if (projects.length === 0) fetchProjects();
@@ -173,6 +177,16 @@ export default function BoardPage() {
             )}
           </div>
 
+          {/* 프로젝트 디테일 버튼 */}
+          <button
+            onClick={() => setIsNoteOpen(true)}
+            className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] px-2.5 py-1.5 text-xs font-medium text-muted transition-colors hover:border-white/[0.15] hover:text-foreground"
+            title="프로젝트 디테일"
+          >
+            <FileText className="h-3.5 w-3.5" />
+            디테일
+          </button>
+
           {/* 우측: 멀티셀렉 컨트롤 */}
           <div className="ml-auto flex items-center gap-3">
             {isMultiSelectMode && selectedTicketIds.size > 0 && (
@@ -230,6 +244,16 @@ export default function BoardPage() {
           onMultiDetailHandled={() => setMultiDetailRequest(null)}
         />
       </div>
+
+      {/* 프로젝트 노트 모달 — isLoading 바깥 배치 (MEMORY.md 패턴) */}
+      {isNoteOpen && (
+        <ProjectNoteModal
+          projectId={projectId}
+          projectName={currentProject?.name ?? projectId}
+          projectColor={currentProject?.color ?? "#6366f1"}
+          onClose={() => setIsNoteOpen(false)}
+        />
+      )}
     </div>
   );
 }

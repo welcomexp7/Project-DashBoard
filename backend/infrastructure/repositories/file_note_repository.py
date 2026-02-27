@@ -9,7 +9,10 @@ from backend.domain.interfaces import NoteRepository
 from backend.domain.note import NoteSector, ProjectNote
 
 _note_lock = asyncio.Lock()
-SECTION_RE = re.compile(r"^##\s+(.+)$")
+# 신규 포맷: HTML 주석 기반 섹터 구분 (콘텐츠 내 ## 헤더와 충돌 방지)
+NEW_SECTOR_RE = re.compile(r"^<!-- SECTOR: (.+) -->$", re.MULTILINE)
+# 레거시 포맷: ## 헤더 기반 (기존 파일 읽기용)
+LEGACY_SECTOR_RE = re.compile(r"^##\s+(.+)$", re.MULTILINE)
 DEFAULT_SECTORS = ["개요", "관련 자료", "일정"]
 
 # 파일명에 사용 불가한 문자 제거
@@ -60,14 +63,18 @@ class FileNoteRepository(NoteRepository):
 
     @staticmethod
     def _parse_sectors(text: str) -> list[NoteSector]:
-        """## 헤더 기반 섹터 파싱"""
+        """섹터 파싱 — 신규(HTML 주석) / 레거시(## 헤더) 자동 감지"""
+        # 신규 포맷이 하나라도 있으면 HTML 주석 기반, 아니면 레거시
+        use_new = NEW_SECTOR_RE.search(text) is not None
+        sector_re = NEW_SECTOR_RE if use_new else LEGACY_SECTOR_RE
+
         lines = text.splitlines()
         sectors: list[NoteSector] = []
         current_name: str | None = None
         current_lines: list[str] = []
 
         for line in lines:
-            m = SECTION_RE.match(line)
+            m = sector_re.match(line)
             if m:
                 if current_name is not None:
                     sectors.append(
@@ -92,7 +99,8 @@ class FileNoteRepository(NoteRepository):
 
     @staticmethod
     def _serialize(sectors: list[NoteSector]) -> str:
+        """항상 HTML 주석 포맷으로 직렬화 (콘텐츠 내 ## 충돌 방지)"""
         parts: list[str] = []
         for sector in sectors:
-            parts.append(f"## {sector.name}\n{sector.content}\n")
+            parts.append(f"<!-- SECTOR: {sector.name} -->\n{sector.content}\n")
         return "\n".join(parts)
