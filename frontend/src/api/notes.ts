@@ -31,12 +31,14 @@ export async function saveNote(
   return data;
 }
 
-/** 프로젝트에 노트 내보내기 */
+/** 프로젝트에 노트 내보내기 (선택된 섹터만 또는 전체) */
 export async function pushNote(
-  projectId: string
+  projectId: string,
+  sectorNames?: string[]
 ): Promise<PushNoteResponse> {
   const { data } = await apiClient.post<PushNoteResponse>(
-    `/projects/${projectId}/notes/push`
+    `/projects/${projectId}/notes/push`,
+    sectorNames ? { sector_names: sectorNames } : undefined
   );
   return data;
 }

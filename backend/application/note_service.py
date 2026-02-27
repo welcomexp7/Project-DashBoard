@@ -24,6 +24,8 @@ class NoteService:
         )
         return await self._repo.save_note(note)
 
-    async def push_to_project(self, project_id: str) -> list[str]:
+    async def push_to_project(
+        self, project_id: str, sector_names: list[str] | None = None
+    ) -> list[str]:
         """대상 프로젝트에 섹터별 파일 내보내기"""
-        return await self._repo.push_to_project(project_id)
+        return await self._repo.push_to_project(project_id, sector_names)

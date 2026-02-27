@@ -8,6 +8,7 @@ from backend.infrastructure.repositories.file_note_repository import (
 )
 from backend.presentation.schemas.note_schemas import (
     ProjectNoteResponse,
+    PushNoteRequest,
     PushNoteResponse,
     SaveNoteRequest,
 )
@@ -47,10 +48,12 @@ async def save_note(
 )
 async def push_note(
     project_id: str,
+    body: PushNoteRequest | None = None,
     service: NoteService = Depends(get_note_service),
 ) -> PushNoteResponse:
     try:
-        pushed = await service.push_to_project(project_id)
+        sector_names = body.sector_names if body else None
+        pushed = await service.push_to_project(project_id, sector_names)
         return PushNoteResponse(project_id=project_id, pushed_files=pushed)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

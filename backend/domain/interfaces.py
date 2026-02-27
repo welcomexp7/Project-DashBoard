@@ -87,8 +87,14 @@ class NoteRepository(ABC):
         pass
 
     @abstractmethod
-    async def push_to_project(self, project_id: str) -> list[str]:
-        """대상 프로젝트 루트에 섹터별 md 파일로 내보내기"""
+    async def push_to_project(
+        self, project_id: str, sector_names: list[str] | None = None
+    ) -> list[str]:
+        """대상 프로젝트 루트에 섹터별 md 파일로 내보내기
+
+        Args:
+            sector_names: 내보낼 섹터 이름 목록. None이면 전체 내보내기.
+        """
         pass
 
 

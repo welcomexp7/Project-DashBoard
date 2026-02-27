@@ -48,13 +48,20 @@ class FileNoteRepository(NoteRepository):
             path.write_text(content, encoding="utf-8")
         return note
 
-    async def push_to_project(self, project_id: str) -> list[str]:
+    async def push_to_project(
+        self, project_id: str, sector_names: list[str] | None = None
+    ) -> list[str]:
         note = await self.get_note(project_id)
         target_dir = self._root / project_id
         if not target_dir.exists():
             raise ValueError(f"대상 프로젝트 디렉토리가 없습니다: {project_id}")
+        # sector_names 지정 시 해당 섹터만, None이면 전체
+        targets = note.sectors
+        if sector_names is not None:
+            name_set = set(sector_names)
+            targets = [s for s in note.sectors if s.name in name_set]
         pushed: list[str] = []
-        for sector in note.sectors:
+        for sector in targets:
             safe_name = _SANITIZE_RE.sub("_", sector.name)
             file_path = target_dir / f"notes-{safe_name}.md"
             file_path.write_text(sector.content, encoding="utf-8")
